@@ -3,7 +3,7 @@ const board = document.querySelector('.board');
 function createBoard() {
   let html = '';
   for (let i = 0; i < 100; i++) {
-    html += `<div class="field" id="${i}"></div>`;
+    html += `<div class="field" data-fieldId="${i}" id="${i}"></div>`;
   }
   board.insertAdjacentHTML('beforeend', html.trim());
 }
@@ -81,25 +81,29 @@ function removePathClass() {
     .querySelectorAll('.path')
     .forEach(field => field.classList.remove('path'));
 }
+function drawPath(arr) {
+  // function drawPath(e) {
+  //   const activeFieldId = Number(
+  //     document.querySelector('.active').closest('.field').id
+  //   );
+  //   const desiredFieldId = Number(e.target.id);
+  //   console.log(activeFieldId, desiredFieldId);
 
-function drawPath(e) {
-  const activeFieldId = Number(
-    document.querySelector('.active').closest('.field').id
-  );
-  const desiredFieldId = Number(e.target.id);
-  console.log(activeFieldId, desiredFieldId);
+  //   let array = Array.from(
+  //     { length: Math.abs(activeFieldId - desiredFieldId) + 1 },
+  //     (_, i) => {
+  //       return desiredFieldId > activeFieldId
+  //         ? i + activeFieldId
+  //         : activeFieldId - i;
+  //     }
+  //   );
+  //   // console.log(array);
 
-  let array = Array.from(
-    { length: Math.abs(activeFieldId - desiredFieldId) + 1 },
-    (_, i) => {
-      return desiredFieldId > activeFieldId
-        ? i + activeFieldId
-        : activeFieldId - i;
-    }
-  );
-  // console.log(array);
-
-  array.forEach(fieldId => {
+  //   array.forEach(fieldId => {
+  //     document.getElementById(`${fieldId}`).classList.add('path');
+  //   });
+  // }
+  return arr.forEach(fieldId => {
     document.getElementById(`${fieldId}`).classList.add('path');
   });
 }
@@ -108,86 +112,86 @@ function div(divId) {
   return document.getElementById(`${divId}`).innerHTML !== '';
 }
 
-function moveBall(e) {
-  // Ball to be moved, only one with 'active' class
-  const ball = document.querySelector('.active');
-  // Field id where the ball is located
-  const activeFieldId = Number(ball.closest('.field').id);
-  // Field id where the ball is suppose to be moved
-  const desiredFieldId = Number(e.target.id);
-  // //////////////////////////////////////////////////////////// //
-  // calcMovesArr(start or id, end){} async?
-  // function calcMoves(startId, endId) {
-  // sort possible fields for the closest number to goal(or reminder of 10)
+// function moveBall(e) {
+//   // Ball to be moved, only one with 'active' class
+//   const ball = document.querySelector('.active');
+//   // Field id where the ball is located
+//   const activeFieldId = Number(ball.closest('.field').id);
+//   // Field id where the ball is suppose to be moved
+//   const desiredFieldId = Number(e.target.id);
+//   // //////////////////////////////////////////////////////////// //
+//   // calcMovesArr(start or id, end){} async?
+//   // function calcMoves(startId, endId) {
+//   // sort possible fields for the closest number to goal(or reminder of 10)
 
-  let id = Number(activeFieldId);
+//   let id = Number(activeFieldId);
 
-  const up = id < 10 || div(id - 10) ? false : id - 10;
-  const down = id >= 90 || div(id + 10) ? false : id + 10;
-  const left = (id % 10 || div(id - 1)) === 0 ? false : id - 1;
-  const right = (id % 10 || div(id + 1)) === 9 ? false : id + 1;
+//   const up = id < 10 || div(id - 10) ? false : id - 10;
+//   const down = id >= 90 || div(id + 10) ? false : id + 10;
+//   const left = (id % 10 || div(id - 1)) === 0 ? false : id - 1;
+//   const right = (id % 10 || div(id + 1)) === 9 ? false : id + 1;
 
-  const values = [up, down, left, right];
-  const possibleFields = values.filter(el => el);
-  const sortedTest = possibleFields.sort((a, b) =>
-    activeFieldId - desiredFieldId < 0 ? a - b : b - a
-  );
-  let array = [id];
+//   const values = [up, down, left, right];
+//   const possibleFields = values.filter(el => el);
+//   const sortedTest = possibleFields.sort((a, b) =>
+//     activeFieldId - desiredFieldId < 0 ? a - b : b - a
+//   );
+//   let array = [id];
 
-  array.push(sortedTest[0]);
-  if (array[array.length - 1] === desiredFieldId) return;
-  else {
-    return moveBall(array[array.length - 1]);
-  }
-  // const testArr = [id];
-  // if (sortedTest[0] !== desiredFieldId) {
-  //   testArr.push(sortedTest[0]);
-  //   calcMovesArr(testArr[testArr.length - 1], desiredFieldId);
-  // } else {
-  //   testArr.push(sortedTest[0]);
-  //   return testArr;
-  // }
-  console.log(possibleFields);
-  console.log(sortedTest);
-  // console.log(testArr);
-  // console.log(
-  //   Array.from(document.querySelectorAll('.field'))
-  //     .filter(el => el.innerHTML === '')
-  //     .map(div => Number(div.id))
-  // );
-  // if no path is found, call isSurrounded ?
+//   array.push(sortedTest[0]);
+//   if (array[array.length - 1] === desiredFieldId) return;
+//   else {
+//     return moveBall(array[array.length - 1]);
+//   }
+//   // const testArr = [id];
+//   // if (sortedTest[0] !== desiredFieldId) {
+//   //   testArr.push(sortedTest[0]);
+//   //   calcMovesArr(testArr[testArr.length - 1], desiredFieldId);
+//   // } else {
+//   //   testArr.push(sortedTest[0]);
+//   //   return testArr;
+//   // }
+//   console.log(possibleFields);
+//   console.log(sortedTest);
+//   // console.log(testArr);
+//   // console.log(
+//   //   Array.from(document.querySelectorAll('.field'))
+//   //     .filter(el => el.innerHTML === '')
+//   //     .map(div => Number(div.id))
+//   // );
+//   // if no path is found, call isSurrounded ?
 
-  // push closest fields until last value is 'end'
+//   // push closest fields until last value is 'end'
 
-  // calcMovesArr();
-  // //////////////////////////////////////////////////////////// //
+//   // calcMovesArr();
+//   // //////////////////////////////////////////////////////////// //
 
-  // let array = Array.from(
-  //   { length: Math.abs(activeFieldId - desiredFieldId) + 1 },
-  //   (_, i) => {
-  //     return desiredFieldId > activeFieldId
-  //       ? i + activeFieldId
-  //       : activeFieldId - i;
-  //   }
-  // );
-  // let array = [];
-  // Delay functionality for ball movement
-  const interval = setInterval(() => {
-    let i = 0;
-    document.getElementById(`${array[i]}`).innerHTML = '';
-    document.getElementById(`${array[i + 1]}`).appendChild(ball);
-    document.getElementById(`${array[i]}`).classList.remove('path');
-    i++;
+//   // let array = Array.from(
+//   //   { length: Math.abs(activeFieldId - desiredFieldId) + 1 },
+//   //   (_, i) => {
+//   //     return desiredFieldId > activeFieldId
+//   //       ? i + activeFieldId
+//   //       : activeFieldId - i;
+//   //   }
+//   // );
+//   // let array = [];
+//   // Delay functionality for ball movement
+//   const interval = setInterval(() => {
+//     let i = 0;
+//     document.getElementById(`${array[i]}`).innerHTML = '';
+//     document.getElementById(`${array[i + 1]}`).appendChild(ball);
+//     document.getElementById(`${array[i]}`).classList.remove('path');
+//     i++;
 
-    array = array.slice(1);
+//     array = array.slice(1);
 
-    if (i === array.length) {
-      removePathClass();
-      removeActiveClass();
-      clearInterval(interval);
-    }
-  }, 150);
-}
+//     if (i === array.length) {
+//       removePathClass();
+//       removeActiveClass();
+//       clearInterval(interval);
+//     }
+//   }, 150);
+// }
 
 function isSurrounded(divId) {
   let id = Number(divId);
@@ -230,6 +234,38 @@ board.addEventListener('click', e => {
   isSurrounded(e.target.closest('.field').id);
   addActiveClass(e.target);
 });
+function go(e) {
+  let id = Number(document.querySelector('.active').closest('.field').id);
+  const goal = Number(e.target.id);
+  const up = id < 10 || div(id - 10) ? false : id - 10;
+  const down = id >= 90 || div(id + 10) ? false : id + 10;
+  const left = (id % 10 || div(id - 1)) === 0 ? false : id - 1;
+  const right = (id % 10 || div(id + 1)) === 9 ? false : id + 1;
+
+  const values = [up, down, left, right];
+  const possibleFields = values.filter(el => el);
+  // const sortedTest = possibleFields.sort((a, b) =>
+  //   id - goal < 0 ? a - b : b - a
+  // );
+  console.log(id, goal);
+  // console.log(sortedTest);
+  if (possibleFields.includes(goal)) {
+    moveBall(goal);
+    document.querySelector('.active').classList.remove('active');
+  }
+}
+
+function moveBall(id) {
+  const ball = document.querySelector('.active');
+  return document.getElementById(`${id}`).appendChild(ball);
+}
+// let id = Number(activeFieldId);
+
+// function moves(activeId) {
+// let id = Number(document.querySelector('.active').closest('field').id);
+
+// return { up: up, down: down, left: left, right: right };
+// }
 
 // Click on the desired field to move the ball
 board.addEventListener('click', e => {
@@ -238,11 +274,12 @@ board.addEventListener('click', e => {
     !document.querySelector('.active')
   )
     return;
-
-  drawPath(e);
-  setTimeout(() => {
-    moveBall(e);
-  }, 300);
+  // moveBall(e.target.id);
+  go(e);
+  // drawPath(e);
+  // setTimeout(() => {
+  //   moveBall(e);
+  // }, 300);
 });
 // Remove 'active' class if there is an active ball, and second click happened anywhere out of 'board' div
 body.addEventListener('click', e => {
@@ -289,3 +326,35 @@ body.addEventListener('click', e => {
 //   // push closest fields until last value is 'end'
 // };
 // calcMovesArr();
+
+// function move(e) {
+//   const activeBall = document.querySelector('.active');
+//   const start = Number(activeBall.closest('.field').id);
+//   const end = Number(e.target.id);
+//   const arrLength = Math.abs(start - end);
+//   const movesArr = Array.from({ length: arrLength + 1 }, (_, i) =>
+//     start < end ? i + start : start - i
+//   );
+//   console.log(start, end, arrLength, movesArr);
+//   if (
+//     Math.abs(
+//       arrLength < 10 &&
+//         start < end &&
+//         movesArr.every(el => document.getElementById(`${el}`).innerHTML === '')
+//     )
+//   ) {
+//     console.log(movesArr);
+//     return movesArr;
+//   } else if (
+//     Math.abs(
+//       arrLength < 10 &&
+//         start > end &&
+//         movesArr.every(el => document.getElementById(`${el}`).innerHTML === '')
+//     )
+//   ) {
+//     console.log(movesArr.reverse());
+//     return movesArr.reverse();
+//   }
+
+//   return movesArr;
+// }
