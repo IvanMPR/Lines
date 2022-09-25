@@ -234,9 +234,16 @@ board.addEventListener('click', e => {
   isSurrounded(e.target.closest('.field').id);
   addActiveClass(e.target);
 });
-function go(e) {
+function getTargetId(e) {
+  return Number(e.target.id);
+}
+
+function currentId() {
+  return Number(document.querySelector('.active').closest('.field').id);
+}
+function go(goal) {
   let id = Number(document.querySelector('.active').closest('.field').id);
-  const goal = Number(e.target.id);
+  // const goal = Number(e.target.id);
   const up = id < 10 || div(id - 10) ? false : id - 10;
   const down = id >= 90 || div(id + 10) ? false : id + 10;
   const left = (id % 10 || div(id - 1)) === 0 ? false : id - 1;
@@ -244,14 +251,27 @@ function go(e) {
 
   const values = [up, down, left, right];
   const possibleFields = values.filter(el => el);
-  // const sortedTest = possibleFields.sort((a, b) =>
-  //   id - goal < 0 ? a - b : b - a
-  // );
+  const sortedTest = possibleFields.sort((a, b) =>
+    id - goal < 0 ? a - b : b - a
+  );
   console.log(id, goal);
   // console.log(sortedTest);
   if (possibleFields.includes(goal)) {
     moveBall(goal);
     document.querySelector('.active').classList.remove('active');
+    return;
+  }
+  if (!possibleFields.includes(goal) && id < goal) {
+    let i = id;
+    const interval = setInterval(() => {
+      i++;
+      moveBall(i);
+      console.log(i);
+      if (i === goal) {
+        clearInterval(interval);
+        setTimeout(removeActiveClass, 200);
+      }
+    }, 500);
   }
 }
 
@@ -275,7 +295,8 @@ board.addEventListener('click', e => {
   )
     return;
   // moveBall(e.target.id);
-  go(e);
+
+  go(getTargetId(e));
   // drawPath(e);
   // setTimeout(() => {
   //   moveBall(e);
