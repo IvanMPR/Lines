@@ -50,7 +50,10 @@ const findEmptyField = function () {
   const unusedFields = Array.from(allFields)
     .filter(field => field.innerHTML === '')
     .map(field => field.getAttribute('id'));
-
+  if (unusedFields.length === 0) {
+    alert('Game Over');
+    return;
+  }
   const randomEmptyField = shuffle(unusedFields)[0];
   const div = document.getElementById(randomEmptyField);
 
@@ -198,13 +201,13 @@ function isSurrounded(divId) {
 
   const soundSurrounded = document.getElementById('sound-surrounded');
   // refactor with div helper function
-  const up = id < 10 ? false : id - 10;
-  const down = id >= 90 ? false : id + 10;
-  const left = id % 10 === 0 ? false : id - 1;
-  const right = id % 10 === 9 ? false : id + 1;
+  const up = id < 10 || id - 10 < 0 || div(id - 10) ? false : id - 10;
+  const down = id >= 90 || id + 10 > 99 || div(id + 10) ? false : id + 10;
+  const left = id % 10 === 0 || id - 1 < 0 || div(id - 1) ? false : id - 1;
+  const right = (id % 10 || id + 1 > 99) === 9 || div(id + 1) ? false : id + 1;
 
   const values = [up, down, left, right];
-  const possibleFields = values.filter(el => el);
+  const possibleFields = values.filter(el => typeof el === 'number');
 
   const isFieldOccupied = possFields => {
     return possFields.every(
@@ -243,41 +246,60 @@ function currentId() {
 }
 function go(goal) {
   let id = Number(document.querySelector('.active').closest('.field').id);
+  // let id = 90;
+  let div = num => document.getElementById(`${num}`).innerHTML !== '';
   // const goal = Number(e.target.id);
-  const up = id < 10 || div(id - 10) ? false : id - 10;
-  const down = id >= 90 || div(id + 10) ? false : id + 10;
-  const left = (id % 10 || div(id - 1)) === 0 ? false : id - 1;
-  const right = (id % 10 || div(id + 1)) === 9 ? false : id + 1;
+  const up = id < 10 || id - 10 < 0 || div(id - 10) ? false : id - 10;
+  const down = id >= 90 || id + 10 > 99 || div(id + 10) ? false : id + 10;
+  const left = id % 10 === 0 || id - 1 < 0 || div(id - 1) ? false : id - 1;
+  const right = (id % 10 || id + 1 > 99) === 9 || div(id + 1) ? false : id + 1;
 
   const values = [up, down, left, right];
-  const possibleFields = values.filter(el => el);
-  const sortedTest = possibleFields.sort((a, b) =>
-    id - goal < 0 ? a - b : b - a
-  );
-  console.log(id, goal);
-  // console.log(sortedTest);
-  if (possibleFields.includes(goal)) {
-    moveBall(goal);
-    document.querySelector('.active').classList.remove('active');
-    return;
+
+  const possibleFields = values.filter(el => typeof el === 'number');
+  const sortedTest = possibleFields.sort((a, b) => (id < goal ? b - a : a - b));
+  console.log(id, goal, possibleFields, sortedTest);
+
+  let path = [];
+  let used = [];
+  function practice(start, end) {
+    if (start === end) {
+      path.push(end);
+      return path;
+    }
+    if (!used.includes(start)) {
+      path.push(start);
+      used.push(start);
+    }
+    return practice(start + 1, end);
   }
-  if (!possibleFields.includes(goal) && id < goal) {
-    let i = id;
-    const interval = setInterval(() => {
-      i++;
-      moveBall(i);
-      console.log(i);
-      if (i === goal) {
-        clearInterval(interval);
-        setTimeout(removeActiveClass, 200);
-      }
-    }, 500);
-  }
+  // console.log(practice(11, 19));
+
+  // let i = id;
+
+  // const interval = setInterval(() => {
+  //   // let diff = Math.abs(id - goal);
+  //   moveBall(i);
+  //   console.log(i);
+  //   if (i === goal) {
+  //     clearInterval(interval);
+  //     setTimeout(removeActiveClass, 200);
+  //   }
+  // }, 300);
 }
 
 function moveBall(id) {
   const ball = document.querySelector('.active');
-  return document.getElementById(`${id}`).appendChild(ball);
+  if (document.getElementById(`${id}`).innerHTML === '') {
+    document.getElementById(`${id}`).appendChild(ball);
+    removeActiveClass();
+    setTimeout(() => {
+      displayBalls(3);
+    }, 100);
+  } else {
+    return;
+  }
+  // return document.getElementById(`${id}`).appendChild(ball);
 }
 // let id = Number(activeFieldId);
 
@@ -287,6 +309,31 @@ function moveBall(id) {
 // return { up: up, down: down, left: left, right: right };
 // }
 
+function checkScore(id) {
+  // Pad first row with zero, in order to be able to split cell id, for determining row and col
+  const tuple = String(id)
+    .padStart(2, '0')
+    .split('')
+    .map(el => Number(el));
+  // Build row id's by data from tuple[0]
+  const row = Array.from({ length: 10 }, (_, i) => tuple[0] * 10 + i);
+  // Build column id's by data from tuple[1]
+  const column = Array.from({ length: 10 }, (_, i) => tuple[1] + i * 10);
+  // Helper fn to extract name of the color used in the cell with some 'id'
+  const extractColor = id =>
+    document.getElementById(`${id}`).innerHTML === ''
+      ? id
+      : document.getElementById(`${id}`).firstChild.className.split(' ')[1];
+  //  Retrieve color name as a string, for later check in row and col
+  const colorToMatch = extractColor(id);
+  // Map row fields, if empty, leave id, else put color name
+  const rowTest = row.map(num => extractColor(num));
+  // Same as above, just for column
+  const columnTest = column.map(num => extractColor(num));
+  console.log(row, column, tuple, rowTest, columnTest, colorToMatch);
+  // Logic for determining if score happened or not
+}
+
 // Click on the desired field to move the ball
 board.addEventListener('click', e => {
   if (
@@ -294,9 +341,10 @@ board.addEventListener('click', e => {
     !document.querySelector('.active')
   )
     return;
-  // moveBall(e.target.id);
+  moveBall(e.target.id);
+  checkScore(e.target.id);
 
-  go(getTargetId(e));
+  // go(getTargetId(e));
   // drawPath(e);
   // setTimeout(() => {
   //   moveBall(e);
@@ -379,3 +427,18 @@ body.addEventListener('click', e => {
 
 //   return movesArr;
 // }
+
+// let path = [];
+// let used = [];
+// function practice(start, end) {
+//   if (start === end) {
+//     path.push(end);
+//     return path;
+//   }
+//   if (!used.includes(start)) {
+//     path.push(start);
+//     used.push(start);
+//   }
+//   return practice(start + 1, end);
+// }
+// console.log(practice(11, 19));
