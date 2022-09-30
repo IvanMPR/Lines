@@ -327,11 +327,18 @@ function checkScore(id) {
   //  Retrieve color name as a string, for later check in row and col
   const colorToMatch = extractColor(id);
   // Map row fields, if empty, leave id, else put color name
-  const rowTest = row.map(num => extractColor(num));
+  const rowMapped = row.map(num => extractColor(num));
   // Same as above, just for column
-  const columnTest = column.map(num => extractColor(num));
-  console.log(row, column, tuple, rowTest, columnTest, colorToMatch);
+  const columnMapped = column.map(num => extractColor(num));
+  console.log(row, column, tuple, rowMapped, columnMapped, colorToMatch);
   // Logic for determining if score happened or not
+  for (let i = 0; i < rowMapped.length / 2; i++) {
+    const current = rowMapped.slice(i, i + 5);
+    // if(current.every(el => el === colorToMatch)){
+
+    // }
+    console.log(current);
+  }
 }
 
 // Click on the desired field to move the ball
