@@ -295,7 +295,7 @@ function moveBall(id) {
     removeActiveClass();
     setTimeout(() => {
       displayBalls(3);
-    }, 100);
+    }, 500);
   } else {
     return;
   }
@@ -308,6 +308,34 @@ function moveBall(id) {
 
 // return { up: up, down: down, left: left, right: right };
 // }
+
+function deleteIfBallsConsecutive(arrTest, colorName, arrToDel) {
+  const indexes = [];
+  for (let i = 0; i <= 5; i++) {
+    const current = arrTest.slice(i, i + 5);
+    console.log(current);
+    if (current.every(el => el === colorName)) {
+      console.log('We have a hit!');
+      indexes.push(i);
+    } else {
+      console.log('We have a miss!');
+    }
+  }
+  console.log(indexes);
+  if (indexes.length === 0) return;
+  let indexesToDelete = Array.from(
+    { length: indexes.length + 5 - 1 },
+    (_, i) => indexes[0] + i
+  );
+  console.log(indexesToDelete);
+  setTimeout(() => {
+    arrToDel.map((el, i) =>
+      indexesToDelete.includes(i)
+        ? (document.getElementById(`${el}`).innerHTML = '')
+        : el
+    );
+  }, 300);
+}
 
 function checkScore(id) {
   // Pad first row with zero, in order to be able to split cell id, for determining row and col
@@ -332,12 +360,22 @@ function checkScore(id) {
   const columnMapped = column.map(num => extractColor(num));
   console.log(row, column, tuple, rowMapped, columnMapped, colorToMatch);
   // Logic for determining if score happened or not
-  for (let i = 0; i < rowMapped.length / 2; i++) {
-    const current = rowMapped.slice(i, i + 5);
-    // if(current.every(el => el === colorToMatch)){
+  const colorOccurrences = (arr, colorName = colorToMatch) => {
+    return arr.filter(el => el === colorName).length;
+  };
 
-    // }
-    console.log(current);
+  console.log(colorOccurrences(rowMapped));
+  console.log(colorOccurrences(columnMapped));
+
+  if (colorOccurrences(rowMapped) >= 5) {
+    console.log('More than five! Row');
+    deleteIfBallsConsecutive(rowMapped, colorToMatch, row);
+  }
+
+  if (colorOccurrences(columnMapped) >= 5) {
+    console.log('More than five! Column');
+
+    deleteIfBallsConsecutive(columnMapped, colorToMatch, column);
   }
 }
 
