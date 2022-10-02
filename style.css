@@ -12,6 +12,10 @@ body {
   overflow: hidden;
 }
 
+.hidden {
+  display: none;
+}
+
 .active {
   outline-offset: 5px;
 }
@@ -30,6 +34,12 @@ h1 {
   color: #fff;
   text-align: center;
   margin-top: 1rem;
+}
+
+.scores {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 2rem;
 }
 
 .btn {
@@ -62,6 +72,7 @@ h1 {
   place-content: center;
   color: white;
   position: relative;
+  background-color: rgb(54, 53, 54);
 }
 
 .field::before {
@@ -74,6 +85,7 @@ h1 {
   font-size: 1rem;
   width: 50px;
   height: 50px;
+  display: none;
 }
 
 /* Checkered pattern */
@@ -96,4 +108,5 @@ h1 {
   border-radius: 50%;
   position: relative;
   z-index: 100;
+  box-shadow: 3px 3px 10px 10px rgba(0, 0, 0, 0.3);
 }
