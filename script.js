@@ -65,10 +65,10 @@ const findEmptyField = function () {
   const unusedFields = Array.from(allFields)
     .filter(field => field.innerHTML === '')
     .map(field => field.getAttribute('id'));
-  if (unusedFields.length === 0) {
-    alert('Game Over');
-    return;
-  }
+  // if (unusedFields.length === 0) {
+  //   alert('Game Over');
+  //   return;
+  // }
   const randomEmptyField = shuffle(unusedFields)[0];
   const div = document.getElementById(randomEmptyField);
 
@@ -79,6 +79,8 @@ function displayBalls(number) {
   if (number === 0) return;
   const div = findEmptyField();
   makeBall(div);
+  //checkScore fn checks if sequence of five or more balls is achieved while randomly placing the balls across the board
+  checkScore(Number(div.id));
   return displayBalls(number - 1);
 }
 
