@@ -145,6 +145,55 @@ function checkScore(id) {
   const row = Array.from({ length: 10 }, (_, i) => tuple[0] * 10 + i);
   // Build column id's by data from tuple[1]
   const column = Array.from({ length: 10 }, (_, i) => tuple[1] + i * 10);
+  // Build first diagonal from top left to bottom right direction
+  const diagonalFromLeftToRight = pair => {
+    let start;
+    let step = 11;
+    if (pair[0] - pair[1] > 0) {
+      start = (pair[0] - pair[1]) * 10;
+    } else if (pair[0] - pair[1] < 0) {
+      start = pair[1] - pair[0];
+    } else {
+      start = 0;
+    }
+    // console.log(
+    //   'Left to Right :',
+    //   Array.from(
+    //     { length: start < 10 ? 10 - start : (100 - start) / 10 },
+    //     (_, i) => start + i * step
+    //   )
+    // );
+    return Array.from(
+      { length: start < 10 ? 10 - start : (100 - start) / 10 },
+      (_, i) => start + i * step
+    );
+  };
+  const diagonalTopLeftBottomRight = diagonalFromLeftToRight(tuple);
+
+  // Build second diagonal from top right to bottom left direction
+
+  const diagonalFromRightToLeft = pair => {
+    let start;
+    let step = 9;
+
+    if (pair[0] + pair[1] <= 9) {
+      start = pair[0] + pair[1];
+    } else {
+      start = Number(String(pair[0] + pair[1]).split('')[1] + '9');
+    }
+    // console.log(
+    //   'Right to Left :',
+    //   Array.from(
+    //     { length: start < 10 ? start + 1 : pair[1] - pair[0] + 1 },
+    //     (_, i) => start + i * step
+    //   )
+    // );
+    return Array.from(
+      { length: start < 10 ? start + 1 : pair[1] - pair[0] + 1 },
+      (_, i) => start + i * step
+    );
+  };
+  const diagonalTopRightBottomLeft = diagonalFromRightToLeft(tuple);
   // Helper fn to extract name of the color used in the cell with some 'id'
   const extractColor = id =>
     document.getElementById(`${id}`).innerHTML === ''
@@ -156,7 +205,24 @@ function checkScore(id) {
   const rowMapped = row.map(num => extractColor(num));
   // Same as above, just for column
   const columnMapped = column.map(num => extractColor(num));
-  console.log(row, column, tuple, rowMapped, columnMapped, colorToMatch);
+  // LR diagonal mapped
+  const lefRigDiagMapped = diagonalTopLeftBottomRight.map(num =>
+    extractColor(num)
+  );
+  // RL diagonal mapped
+  const rigLefDiagMapped = diagonalTopRightBottomLeft.map(num =>
+    extractColor(num)
+  );
+  console.log(
+    row,
+    column,
+    tuple,
+    rowMapped,
+    columnMapped,
+    colorToMatch,
+    diagonalTopLeftBottomRight,
+    diagonalTopRightBottomLeft
+  );
   // Logic for determining if score happened or not
   const colorOccurrences = (arr, colorName = colorToMatch) => {
     return arr.filter(el => el === colorName).length;
@@ -168,6 +234,20 @@ function checkScore(id) {
 
   if (colorOccurrences(columnMapped) >= 5) {
     deleteIfBallsConsecutive(columnMapped, colorToMatch, column);
+  }
+  if (colorOccurrences(lefRigDiagMapped) >= 5) {
+    deleteIfBallsConsecutive(
+      lefRigDiagMapped,
+      colorToMatch,
+      diagonalTopLeftBottomRight
+    );
+  }
+  if (colorOccurrences(rigLefDiagMapped) >= 5) {
+    deleteIfBallsConsecutive(
+      rigLefDiagMapped,
+      colorToMatch,
+      diagonalTopRightBottomLeft
+    );
   }
   updateResult(result.count);
 }
