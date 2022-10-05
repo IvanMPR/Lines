@@ -156,13 +156,7 @@ function checkScore(id) {
     } else {
       start = 0;
     }
-    // console.log(
-    //   'Left to Right :',
-    //   Array.from(
-    //     { length: start < 10 ? 10 - start : (100 - start) / 10 },
-    //     (_, i) => start + i * step
-    //   )
-    // );
+
     return Array.from(
       { length: start < 10 ? 10 - start : (100 - start) / 10 },
       (_, i) => start + i * step
@@ -179,17 +173,23 @@ function checkScore(id) {
     if (pair[0] + pair[1] <= 9) {
       start = pair[0] + pair[1];
     } else {
-      start = Number(String(pair[0] + pair[1]).split('')[1] + '9');
+      const calcStart = String(pair[0] + pair[1])
+        .split('')
+        .map(el => Number(el))
+        .reduce((acc, curr) => acc + curr, 0);
+      start = Number(calcStart + '9');
+      // console.log(start);
     }
-    // console.log(
-    //   'Right to Left :',
-    //   Array.from(
-    //     { length: start < 10 ? start + 1 : pair[1] - pair[0] + 1 },
-    //     (_, i) => start + i * step
-    //   )
-    // );
+
     return Array.from(
-      { length: start < 10 ? start + 1 : pair[1] - pair[0] + 1 },
+      {
+        length:
+          start < 10
+            ? start + 1
+            : Number(String(start).slice(-1)) -
+              Number(String(start).slice(0, 1)) +
+              1,
+      },
       (_, i) => start + i * step
     );
   };
@@ -214,14 +214,16 @@ function checkScore(id) {
     extractColor(num)
   );
   console.log(
-    row,
-    column,
+    // row,
+    // column,
     tuple,
-    rowMapped,
-    columnMapped,
-    colorToMatch,
-    diagonalTopLeftBottomRight,
-    diagonalTopRightBottomLeft
+    // rowMapped,
+    // columnMapped,
+    colorToMatch
+    // diagonalTopLeftBottomRight,
+    // lefRigDiagMapped,
+    // diagonalTopRightBottomLeft,
+    // rigLefDiagMapped
   );
   // Logic for determining if score happened or not
   const colorOccurrences = (arr, colorName = colorToMatch) => {
