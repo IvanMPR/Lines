@@ -5,6 +5,7 @@ const body = document.querySelector('body');
 
 const result = {
   count: 0,
+  state: true,
 };
 
 function createBoard() {
@@ -16,6 +17,21 @@ function createBoard() {
 }
 
 createBoard();
+
+function gameOver() {
+  const html = `<div class="modal">
+      <div class="info">
+        <p class="text">Game Over! You had ${result.count} points!</p>
+        </div>
+      </div>`;
+  body.insertAdjacentHTML('afterbegin', html);
+}
+
+body.addEventListener('click', e => {
+  if (!e.target.classList.contains('modal')) return;
+  document.querySelector('.modal').remove();
+  location.reload();
+});
 
 function showResultParagraph() {
   return document.querySelector('.scores').classList.remove('hidden');
@@ -49,7 +65,7 @@ const makeBall = element => {
     'yellowgreen',
     'magenta',
     'cornflowerblue',
-    'indianred',
+    // 'indianred',
     'goldenrod',
   ];
 
@@ -65,23 +81,41 @@ const findEmptyField = function () {
   const unusedFields = Array.from(allFields)
     .filter(field => field.innerHTML === '')
     .map(field => field.getAttribute('id'));
-  // if (unusedFields.length === 0) {
-  //   alert('Game Over');
-  //   return;
-  // }
+
   const randomEmptyField = shuffle(unusedFields)[0];
   const div = document.getElementById(randomEmptyField);
-
-  return div;
+  if (unusedFields.length > 0) {
+    return div;
+  } else {
+    return false;
+  }
 };
 
 function displayBalls(number) {
-  if (number === 0) return;
-  const div = findEmptyField();
-  makeBall(div);
-  //checkScore fn checks if sequence of five or more balls is achieved while randomly placing the balls across the board
-  checkScore(Number(div.id));
-  return displayBalls(number - 1);
+  // -------------------------------------------- //
+  // recursive version of displayBalls function
+  // if (number === 0) return;
+  // const div = findEmptyField();
+  // makeBall(div);
+  // checkScore(Number(div.id));
+  // return displayBalls(number - 1);
+  // -------------------------------------------- //
+  // loop is better option because of the ability to break when all fields are filed, with not causing error in console
+  const allFields = document.querySelectorAll('.field');
+  for (let i = 0; i < number; i++) {
+    const unusedFields = Array.from(allFields).filter(
+      field => field.innerHTML === ''
+    );
+    if (unusedFields.length > 1) {
+      const div = findEmptyField();
+      makeBall(div);
+      //checkScore fn checks if sequence of five or more balls is achieved while randomly placing the balls across the board
+      checkScore(Number(div.id));
+    } else {
+      gameOver();
+      break;
+    }
+  }
 }
 
 function addActiveClass(ball) {
@@ -213,18 +247,18 @@ function checkScore(id) {
   const rigLefDiagMapped = diagonalTopRightBottomLeft.map(num =>
     extractColor(num)
   );
-  console.log(
-    // row,
-    // column,
-    tuple,
-    // rowMapped,
-    // columnMapped,
-    colorToMatch
-    // diagonalTopLeftBottomRight,
-    // lefRigDiagMapped,
-    // diagonalTopRightBottomLeft,
-    // rigLefDiagMapped
-  );
+  // console.log(
+  // row,
+  // column,
+  // tuple,
+  // rowMapped,
+  // columnMapped,
+  // colorToMatch
+  // diagonalTopLeftBottomRight,
+  // lefRigDiagMapped,
+  // diagonalTopRightBottomLeft,
+  // rigLefDiagMapped
+  // );
   // Logic for determining if score happened or not
   const colorOccurrences = (arr, colorName = colorToMatch) => {
     return arr.filter(el => el === colorName).length;
