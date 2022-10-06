@@ -5,7 +5,7 @@ const body = document.querySelector('body');
 
 const result = {
   count: 0,
-  state: true,
+  nextRound: true,
 };
 
 function createBoard() {
@@ -76,41 +76,36 @@ const makeBall = element => {
   element.appendChild(ball);
 };
 
-const findEmptyField = function () {
-  const allFields = document.querySelectorAll('.field');
-  const unusedFields = Array.from(allFields)
-    .filter(field => field.innerHTML === '')
-    .map(field => field.getAttribute('id'));
+// const findEmptyField = function () {
+//   const allFields = document.querySelectorAll('.field');
+//   const unusedFields = Array.from(allFields)
+//     .filter(field => field.innerHTML === '')
+//     .map(field => field.getAttribute('id'));
 
-  const randomEmptyField = shuffle(unusedFields)[0];
-  const div = document.getElementById(randomEmptyField);
-  if (unusedFields.length > 0) {
-    return div;
-  } else {
-    return false;
-  }
-};
+//   const randomEmptyField = shuffle(unusedFields)[0];
+//   const div = document.getElementById(randomEmptyField);
+//   if (unusedFields.length > 0) {
+//     return div;
+//   } else {
+//     return false;
+//   }
+// };
 
 function displayBalls(number) {
-  // -------------------------------------------- //
-  // recursive version of displayBalls function
-  // if (number === 0) return;
-  // const div = findEmptyField();
-  // makeBall(div);
-  // checkScore(Number(div.id));
-  // return displayBalls(number - 1);
-  // -------------------------------------------- //
-  // loop is better option because of the ability to break when all fields are filed, with not causing error in console
   const allFields = document.querySelectorAll('.field');
 
   for (let i = 0; i < number; i++) {
-    const unusedFields = Array.from(allFields).filter(
-      field => field.innerHTML === ''
-    );
+    const unusedFields = Array.from(allFields)
+      .filter(field => field.innerHTML === '')
+      .map(field => field.getAttribute('id'));
+
+    const randomEmptyField = shuffle(unusedFields)[0];
+    const div = document.getElementById(randomEmptyField);
+
+    if (!result.nextRound) return;
+
     if (unusedFields.length > 0) {
-      const div = findEmptyField();
       makeBall(div);
-      //checkScore fn checks if sequence of five or more balls is achieved while randomly placing the balls across the board
       checkScore(Number(div.id));
     } else {
       gameOver();
@@ -154,6 +149,7 @@ function deleteIfBallsConsecutive(arrTest, colorName, arrToDel) {
   }
 
   if (indexes.length === 0) return;
+
   let indexesToDelete = Array.from(
     { length: indexes.length + 5 - 1 },
     (_, i) => indexes[0] + i
@@ -167,7 +163,10 @@ function deleteIfBallsConsecutive(arrTest, colorName, arrToDel) {
     );
   }, 300);
   // Update internal result count
+
   result.count += (indexes.length - 1 + 5) * 10;
+  // Stop ball placement after the scored hit
+  result.nextRound = false;
 }
 
 function checkScore(id) {
@@ -297,6 +296,8 @@ board.addEventListener('click', e => {
     !document.querySelector('.active')
   )
     return;
+
+  result.nextRound = true;
   moveBall(e.target.id);
   checkScore(e.target.id);
 });
@@ -312,3 +313,4 @@ body.addEventListener('click', e => {
     removeActiveClass();
   }
 });
+// ---------------------------------------- //
