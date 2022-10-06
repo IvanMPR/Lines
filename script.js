@@ -102,11 +102,12 @@ function displayBalls(number) {
   // -------------------------------------------- //
   // loop is better option because of the ability to break when all fields are filed, with not causing error in console
   const allFields = document.querySelectorAll('.field');
+
   for (let i = 0; i < number; i++) {
     const unusedFields = Array.from(allFields).filter(
       field => field.innerHTML === ''
     );
-    if (unusedFields.length > 1) {
+    if (unusedFields.length > 0) {
       const div = findEmptyField();
       makeBall(div);
       //checkScore fn checks if sequence of five or more balls is achieved while randomly placing the balls across the board
@@ -147,7 +148,7 @@ function deleteIfBallsConsecutive(arrTest, colorName, arrToDel) {
   const indexes = [];
   for (let i = 0; i <= 5; i++) {
     const current = arrTest.slice(i, i + 5);
-    if (current.every(el => el === colorName)) {
+    if (current.every(el => el === colorName) && current.length >= 5) {
       indexes.push(i);
     }
   }
@@ -247,18 +248,7 @@ function checkScore(id) {
   const rigLefDiagMapped = diagonalTopRightBottomLeft.map(num =>
     extractColor(num)
   );
-  // console.log(
-  // row,
-  // column,
-  // tuple,
-  // rowMapped,
-  // columnMapped,
-  // colorToMatch
-  // diagonalTopLeftBottomRight,
-  // lefRigDiagMapped,
-  // diagonalTopRightBottomLeft,
-  // rigLefDiagMapped
-  // );
+
   // Logic for determining if score happened or not
   const colorOccurrences = (arr, colorName = colorToMatch) => {
     return arr.filter(el => el === colorName).length;
