@@ -1,16 +1,21 @@
+const BOARD_LENGTH = 10;
+const NUMBER_OF_BALLS = 3;
+const GOAL_LENGTH = 5;
+const POINTS_MULTIPLIER = 10;
+
 // Create board
 const board = document.querySelector('.board');
 const button = document.querySelector('.btn');
 const body = document.querySelector('body');
 
-const result = {
+const mainObject = {
   count: 0,
   nextRound: true,
 };
 
 function createBoard() {
   let html = '';
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < BOARD_LENGTH * BOARD_LENGTH; i++) {
     html += `<div class="field" data-fieldId="${i}" id="${i}"></div>`;
   }
   board.insertAdjacentHTML('beforeend', html.trim());
@@ -21,17 +26,11 @@ createBoard();
 function gameOver() {
   const html = `<div class="modal">
       <div class="info">
-        <p class="text">Game Over! You had ${result.count} points!</p>
+        <p class="text">Game Over! You had ${mainObject.count} points!</p>
         </div>
       </div>`;
   body.insertAdjacentHTML('afterbegin', html);
 }
-
-body.addEventListener('click', e => {
-  if (!e.target.classList.contains('modal')) return;
-  document.querySelector('.modal').remove();
-  location.reload();
-});
 
 function showResultParagraph() {
   return document.querySelector('.scores').classList.remove('hidden');
@@ -76,21 +75,6 @@ const makeBall = element => {
   element.appendChild(ball);
 };
 
-// const findEmptyField = function () {
-//   const allFields = document.querySelectorAll('.field');
-//   const unusedFields = Array.from(allFields)
-//     .filter(field => field.innerHTML === '')
-//     .map(field => field.getAttribute('id'));
-
-//   const randomEmptyField = shuffle(unusedFields)[0];
-//   const div = document.getElementById(randomEmptyField);
-//   if (unusedFields.length > 0) {
-//     return div;
-//   } else {
-//     return false;
-//   }
-// };
-
 function displayBalls(number) {
   const allFields = document.querySelectorAll('.field');
 
@@ -102,14 +86,11 @@ function displayBalls(number) {
     const randomEmptyField = shuffle(unusedFields)[0];
     const div = document.getElementById(randomEmptyField);
 
-    if (!result.nextRound) return;
+    if (!mainObject.nextRound) return;
 
     if (unusedFields.length > 0) {
       makeBall(div);
       checkScore(Number(div.id));
-    } else {
-      gameOver();
-      break;
     }
   }
 }
@@ -132,7 +113,7 @@ function moveBall(id) {
     document.getElementById(`${id}`).appendChild(ball);
     removeActiveClass();
     setTimeout(() => {
-      displayBalls(3);
+      displayBalls(NUMBER_OF_BALLS);
     }, 500);
   } else {
     return;
@@ -141,9 +122,12 @@ function moveBall(id) {
 
 function deleteIfBallsConsecutive(arrTest, colorName, arrToDel) {
   const indexes = [];
-  for (let i = 0; i <= 5; i++) {
-    const current = arrTest.slice(i, i + 5);
-    if (current.every(el => el === colorName) && current.length >= 5) {
+  for (let i = 0; i <= GOAL_LENGTH; i++) {
+    const current = arrTest.slice(i, i + GOAL_LENGTH);
+    if (
+      current.every(el => el === colorName) &&
+      current.length >= GOAL_LENGTH
+    ) {
       indexes.push(i);
     }
   }
@@ -151,7 +135,7 @@ function deleteIfBallsConsecutive(arrTest, colorName, arrToDel) {
   if (indexes.length === 0) return;
 
   let indexesToDelete = Array.from(
-    { length: indexes.length + 5 - 1 },
+    { length: indexes.length + GOAL_LENGTH - 1 },
     (_, i) => indexes[0] + i
   );
 
@@ -164,9 +148,9 @@ function deleteIfBallsConsecutive(arrTest, colorName, arrToDel) {
   }, 300);
   // Update internal result count
 
-  result.count += (indexes.length - 1 + 5) * 10;
-  // Stop ball placement after the scored hit
-  result.nextRound = false;
+  mainObject.count += (indexes.length - 1 + GOAL_LENGTH) * POINTS_MULTIPLIER;
+  // Stop ball placement after the hit is scored
+  mainObject.nextRound = false;
 }
 
 function checkScore(id) {
@@ -175,16 +159,22 @@ function checkScore(id) {
     .padStart(2, '0')
     .split('')
     .map(el => Number(el));
-  // Build row id's by data from tuple[0]
-  const row = Array.from({ length: 10 }, (_, i) => tuple[0] * 10 + i);
-  // Build column id's by data from tuple[1]
-  const column = Array.from({ length: 10 }, (_, i) => tuple[1] + i * 10);
+  // Identify row by data from tuple[0]
+  const row = Array.from(
+    { length: BOARD_LENGTH },
+    (_, i) => tuple[0] * BOARD_LENGTH + i
+  );
+  // Identify column by data from tuple[1]
+  const column = Array.from(
+    { length: BOARD_LENGTH },
+    (_, i) => tuple[1] + i * BOARD_LENGTH
+  );
   // Build first diagonal from top left to bottom right direction
   const diagonalFromLeftToRight = pair => {
     let start;
-    let step = 11;
+    let step = BOARD_LENGTH + 1;
     if (pair[0] - pair[1] > 0) {
-      start = (pair[0] - pair[1]) * 10;
+      start = (pair[0] - pair[1]) * BOARD_LENGTH;
     } else if (pair[0] - pair[1] < 0) {
       start = pair[1] - pair[0];
     } else {
@@ -192,7 +182,12 @@ function checkScore(id) {
     }
 
     return Array.from(
-      { length: start < 10 ? 10 - start : (100 - start) / 10 },
+      {
+        length:
+          start < BOARD_LENGTH
+            ? BOARD_LENGTH - start
+            : (BOARD_LENGTH * BOARD_LENGTH - start) / BOARD_LENGTH,
+      },
       (_, i) => start + i * step
     );
   };
@@ -202,23 +197,23 @@ function checkScore(id) {
 
   const diagonalFromRightToLeft = pair => {
     let start;
-    let step = 9;
+    let step = BOARD_LENGTH - 1;
 
-    if (pair[0] + pair[1] <= 9) {
+    if (pair[0] + pair[1] <= step) {
       start = pair[0] + pair[1];
     } else {
       const calcStart = String(pair[0] + pair[1])
         .split('')
         .map(el => Number(el))
         .reduce((acc, curr) => acc + curr, 0);
-      start = Number(calcStart + '9');
+      start = Number(calcStart + String(step));
       // console.log(start);
     }
 
     return Array.from(
       {
         length:
-          start < 10
+          start < BOARD_LENGTH
             ? start + 1
             : Number(String(start).slice(-1)) -
               Number(String(start).slice(0, 1)) +
@@ -252,34 +247,48 @@ function checkScore(id) {
   const colorOccurrences = (arr, colorName = colorToMatch) => {
     return arr.filter(el => el === colorName).length;
   };
-
-  if (colorOccurrences(rowMapped) >= 5) {
+  // If number of balls of current color >= GOAL_LENGTH in the current row, check if they are consecutive
+  if (colorOccurrences(rowMapped) >= GOAL_LENGTH) {
     deleteIfBallsConsecutive(rowMapped, colorToMatch, row);
   }
-
-  if (colorOccurrences(columnMapped) >= 5) {
+  // If number of balls of current color >= GOAL_LENGTH in the current column, check if they are consecutive
+  if (colorOccurrences(columnMapped) >= GOAL_LENGTH) {
     deleteIfBallsConsecutive(columnMapped, colorToMatch, column);
   }
-  if (colorOccurrences(lefRigDiagMapped) >= 5) {
+  // If number of balls of current color >= GOAL_LENGTH in the current TOP L BOTTOM R diagonal, check if they are consecutive
+  if (colorOccurrences(lefRigDiagMapped) >= GOAL_LENGTH) {
     deleteIfBallsConsecutive(
       lefRigDiagMapped,
       colorToMatch,
       diagonalTopLeftBottomRight
     );
   }
-  if (colorOccurrences(rigLefDiagMapped) >= 5) {
+  // If number of balls of current color >= GOAL_LENGTH in the current TOP R BOTTOM L diagonal, check if they are consecutive
+
+  if (colorOccurrences(rigLefDiagMapped) >= GOAL_LENGTH) {
     deleteIfBallsConsecutive(
       rigLefDiagMapped,
       colorToMatch,
       diagonalTopRightBottomLeft
     );
   }
-  updateResult(result.count);
+  updateResult(mainObject.count);
+  // ----------------------------------------------------------- //
+  // Check if game is over
+  const allFields = document.querySelectorAll('.field');
+  const unusedFields = Array.from(allFields).filter(
+    field => field.innerHTML === ''
+  );
+  setTimeout(() => {
+    if (unusedFields.length === 0 && mainObject.nextRound) {
+      gameOver();
+    }
+  }, 300);
 }
-
+// Start the game and hide the button
 button.addEventListener('click', function () {
   this.style.display = 'none';
-  displayBalls(3);
+  displayBalls(NUMBER_OF_BALLS);
   showResultParagraph();
 });
 // Click on the ball to select it
@@ -297,9 +306,15 @@ board.addEventListener('click', e => {
   )
     return;
 
-  result.nextRound = true;
+  mainObject.nextRound = true;
   moveBall(e.target.id);
   checkScore(e.target.id);
+});
+// Close modal
+body.addEventListener('click', e => {
+  if (!e.target.classList.contains('modal')) return;
+  document.querySelector('.modal').remove();
+  location.reload();
 });
 // Remove 'active' class if there is an active ball, and second click happened anywhere out of 'board' div
 body.addEventListener('click', e => {
@@ -313,4 +328,3 @@ body.addEventListener('click', e => {
     removeActiveClass();
   }
 });
-// ---------------------------------------- //
