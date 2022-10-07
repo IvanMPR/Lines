@@ -52,14 +52,8 @@ body {
   outline-offset: 5px;
 }
 
-.path {
-  background-color: rgba(255, 255, 0, 0.3) !important;
-  transition: background-color 0.2s ease-in-out;
-}
-
 .top {
   height: 150px;
-  background-color: bisque;
 }
 
 h1 {
@@ -72,6 +66,7 @@ h1 {
   text-align: center;
   margin-top: 2rem;
   font-size: 2rem;
+  color: white;
 }
 
 .btn {
@@ -84,13 +79,9 @@ h1 {
 .board {
   width: 700px;
   height: 700px;
-
   margin: 2rem auto;
-  /* background-color: goldenrod; */
-
   display: grid;
   gap: 5px;
-
   grid-template-columns: repeat(10, 1fr);
   grid-template-rows: auto;
 }

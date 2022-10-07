@@ -194,7 +194,6 @@ function checkScore(id) {
   const diagonalTopLeftBottomRight = diagonalFromLeftToRight(tuple);
 
   // Build second diagonal from top right to bottom left direction
-
   const diagonalFromRightToLeft = pair => {
     let start;
     let step = BOARD_LENGTH - 1;
@@ -223,6 +222,7 @@ function checkScore(id) {
     );
   };
   const diagonalTopRightBottomLeft = diagonalFromRightToLeft(tuple);
+
   // Helper fn to extract name of the color used in the cell with some 'id'
   const extractColor = id =>
     document.getElementById(`${id}`).innerHTML === ''
