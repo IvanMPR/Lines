@@ -3,16 +3,60 @@ const NUMBER_OF_BALLS = 3;
 const GOAL_LENGTH = 5;
 const POINTS_MULTIPLIER = 10;
 
-// Create board
 const board = document.querySelector('.board');
 const button = document.querySelector('.btn');
 const body = document.querySelector('body');
+const failSound = new Audio('./sounds/invalid_move.wav');
+// ----------------------------------------------------- //
+function div(divId) {
+  return document.getElementById(`${divId}`).innerHTML !== '';
+}
+function makeList() {
+  const list = {};
+  const gameFields = Array.from(document.querySelectorAll('.field'));
+  gameFields.forEach(field => {
+    const id = Number(field.getAttribute('id'));
+
+    const up = id < 10 || id - 10 < 0 || div(id - 10) ? false : id - 10;
+    const down = id >= 90 || id + 10 > 99 || div(id + 10) ? false : id + 10;
+    const left = id % 10 === 0 || id - 1 < 0 || div(id - 1) ? false : id - 1;
+    const right = id % 10 === 9 || id + 1 > 99 || div(id + 1) ? false : id + 1;
+
+    const values = [up, down, left, right].filter(el => el !== false);
+    list[id] = values;
+  });
+
+  // console.log(list);
+  return list;
+}
+
+const isMovePossible = (nodeA, nodeB) => {
+  const graph = makeList();
+  return hasPath(graph, nodeA, nodeB, new Set());
+};
+
+const hasPath = (graph, src, dst, visited) => {
+  if (visited.has(src)) return false;
+  if (src === dst) return true;
+  visited.add(src);
+  // console.log(visited);
+
+  for (let neighbor of graph[src]) {
+    if (hasPath(graph, neighbor, dst, visited) === true) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+// ----------------------------------------------------- //
 
 const mainObject = {
   count: 0,
   nextRound: true,
 };
-
+// Create board
 function createBoard() {
   let html = '';
   for (let i = 0; i < BOARD_LENGTH * BOARD_LENGTH; i++) {
@@ -93,6 +137,9 @@ function displayBalls(number) {
       checkScore(Number(div.id));
     }
   }
+  // setTimeout(() => {
+  //   makeList();
+  // }, 500);
 }
 
 function addActiveClass(ball) {
@@ -108,14 +155,19 @@ function removeActiveClass() {
 }
 
 function moveBall(id) {
-  const ball = document.querySelector('.active');
-  if (document.getElementById(`${id}`).innerHTML === '') {
-    document.getElementById(`${id}`).appendChild(ball);
-    removeActiveClass();
-    setTimeout(() => {
-      displayBalls(NUMBER_OF_BALLS);
-    }, 500);
+  const start = Number(document.querySelector('.active').closest('.field').id);
+  const goal = Number(id);
+  if (isMovePossible(start, goal)) {
+    const ball = document.querySelector('.active');
+    if (document.getElementById(`${id}`).innerHTML === '') {
+      document.getElementById(`${id}`).appendChild(ball);
+      removeActiveClass();
+      setTimeout(() => {
+        displayBalls(NUMBER_OF_BALLS);
+      }, 500);
+    }
   } else {
+    failSound.play();
     return;
   }
 }
